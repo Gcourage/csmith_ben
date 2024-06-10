@@ -952,8 +952,8 @@ VariableSelector::GenerateParameterVariable(Function &curFunc)
 	const Type* t = 0;
 	bool rnd = rnd_flipcoin(40);
 	ERROR_RETURN();
-	if (Type::has_pointer_type() && rnd) {
-		t= Type::choose_random_pointer_type();
+	if (Type::has_pointer_type() && rnd) {   // ??? is cg option set?
+		t= Type::choose_random_pointer_type(); // Ben Hu, ???
 	}
 	else {
 		t = Type::choose_random_nonvoid_nonvolatile();

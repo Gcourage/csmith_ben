@@ -71,7 +71,7 @@ enum eBinaryOp
 /*
  *
  */
-enum eTermType
+enum eTermType // ???  
 {
 	eConstant,
 	eVariable,

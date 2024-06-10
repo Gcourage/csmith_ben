@@ -271,6 +271,11 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 		if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
 			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
 		}
+
+		//??? Debug by Ben Hu, param should be a variable, if parameter is struct
+		if (type->eType == eStruct ||  type->eType == eUnion) {
+			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
+		}
 		tt = ExpressionTypeProbability(&filter);
 	}
 

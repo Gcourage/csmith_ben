@@ -61,9 +61,10 @@ enum eTypeDesc
 	eSimple,
 	ePointer,
 	eUnion,
-    eStruct,
+    eStruct,  // add reference type here?
+	eReference, // only support in C++
 };
-#define MAX_TYPE_DESC ((eTypeDesc) (eStruct+1))
+#define MAX_TYPE_DESC ((eTypeDesc) (eReference+1))
 
 /*
  *
@@ -92,7 +93,7 @@ enum eMatchType
 {
 	eExact,
 	eConvert,
-	eDereference,
+	eDereference, // ? what's this, derefence for pointer?
 	eDerefExact,
 	eFlexible,
 };
@@ -198,6 +199,9 @@ public:
 
 	// make a random pointer type
 	static Type* make_random_pointer_type(void);
+
+	// make a randome reference type
+	static Type* make_random_reference_type(void);
 
 	static const Type *get_type_from_string(const string &type_string);
 

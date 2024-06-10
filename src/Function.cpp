@@ -399,7 +399,7 @@ GenerateParameterList(Function &curFunc)
 		// Also, build the parent's link structure for this invocation and push
 		// it onto the back.
 		//
-		VariableSelector::GenerateParameterVariable(curFunc);
+		VariableSelector::GenerateParameterVariable(curFunc); // Ben Hu
 		ERROR_RETURN();
 	}
 }
@@ -435,6 +435,8 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 	FuncList.push_back(this);			// Add to global list of functions.
 }
 
+
+// ??? here is create a function declation
 Function *
 Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {
@@ -443,7 +445,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, NULL);
 	ERROR_GUARD(NULL);
-	Function *f = new Function(RandomFunctionName(), type);
+	Function *f = new Function(RandomFunctionName(), type); /// ???  type is return type
 
 	// dummy variable representing return variable, we don't care about the type, so use 0
 	string rvname = f->name + "_" + "rv";
@@ -528,6 +530,14 @@ OutputFormalParam(Variable *var, std::ostream *pOut)
 		assert(var->type->eType != eUnion);
 
 	var->output_qualified_type(out);
+	// ??? add by Ben Hu, if function parameter type is struct, set as reference
+	if (var->type->eType == eStruct || var->type->eType == eUnion)
+	{
+		if (rnd_flipcoin(100)) {
+			out << "&";
+		}
+	}
+	
 	out << " " << var->name;
     return 0;
 }
@@ -730,7 +740,7 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	cg_context.extend_call_chain(prev_context);
 
 	// inherit proper no-read/write directives from caller
-	VariableSet no_reads, no_writes, must_reads, must_writes, frame_vars;
+	VariableSet no_reads, no_writes, must_reads, must_writes, frame_vars; // ???  frame_vars
 	prev_context.find_reachable_frame_vars(fm->global_facts, frame_vars);
 	prev_context.get_external_no_reads_writes(no_reads, no_writes, frame_vars);
 	RWDirective rwd(no_reads, no_writes, must_reads, must_writes);

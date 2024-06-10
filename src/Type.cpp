@@ -70,7 +70,7 @@ Type *Type::void_type = NULL;
 // ---------------------------------------------------------------------
 // List of all types used in the program
 static vector<Type *> AllTypes;
-static vector<Type *> derived_types;
+static vector<Type *> derived_types; // ??? what's the derived means
 
 AttributeGenerator struct_type_attr_generator;
 AttributeGenerator union_type_attr_generator;
@@ -86,10 +86,10 @@ InitializeTypeAttributes()
 		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
 		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
 		union_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
-                union_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
+        union_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
+        union_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
+        union_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
+        union_type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
 	}
 }
 
@@ -501,6 +501,8 @@ Type::find_pointer_type(const Type* t, bool add)
 	}
     return 0;
 }
+
+// ???  this is need a find_reference type function?  by Ben Hu
 
 bool
 Type::is_const_struct_union() const
@@ -1204,7 +1206,7 @@ Type::make_random_union_type(void)
 
 // ---------------------------------------------------------------------
 Type*
-Type::make_random_pointer_type(void)
+Type::make_random_pointer_type(void)  // ???  Ben Hu, all typeDesc should be use function to create
 {
     //Type* new_type = 0;
     //Type* ptr_type = 0;
@@ -1220,6 +1222,37 @@ Type::make_random_pointer_type(void)
 			}
 		}
 	}
+
+    // choose a pointer to basic/aggregate types
+	const Type* t = choose_random();
+	ERROR_GUARD(NULL);
+	// consolidate all integer pointer types into "int*", hopefully this increase
+	// chance of pointer assignments and dereferences
+	if (t->eType == eSimple) {
+		t = get_int_type();
+		ERROR_GUARD(NULL);
+	}
+	return find_pointer_type(t, true);
+}
+
+// ---------------------------------------------------------------------
+Type*
+Type::make_random_reference_type(void)  // ???  Ben Hu, all typeDesc should be use function to create
+{
+    //Type* new_type = 0;
+    //Type* ptr_type = 0;
+    // occasionally choose pointer to pointers
+    // if (rnd_flipcoin(20)) {
+	// 	ERROR_GUARD(NULL);
+    //     if (derived_types.size() > 0) {
+	// 		unsigned int rnd_num = rnd_upto(derived_types.size());
+	// 		ERROR_GUARD(NULL);
+	// 		const Type* t = derived_types[rnd_num];
+	// 		if (t->get_indirect_level() < CGOptions::max_indirect_level()) {
+	// 			return find_pointer_type(t, true);
+	// 		}
+	// 	}
+	// }
 
     // choose a pointer to basic/aggregate types
 	const Type* t = choose_random();
@@ -1266,14 +1299,16 @@ GenerateAllTypes(void)
 		    AllTypes.push_back(ty);
 	    }
     }
+
+	//? cpp add refence types
 	if (CGOptions::use_union()) {
         while (MoreTypesProbability()) {
 		    Type *ty = Type::make_random_union_type();
 		    AllTypes.push_back(ty);
 	    }
     }
-}
 
+}
 // ---------------------------------------------------------------------
 const Type *
 Type::choose_random()
